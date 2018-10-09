@@ -34,7 +34,7 @@
             </b-button>
         </div>
         <div class="col-md-6 pb-2 score" >
-            <h3>Score <b-badge>3078</b-badge></h3>
+            <h3>Score <b-badge>{{score}}</b-badge></h3>
         </div>
      </div>
      <div class="row">
@@ -54,7 +54,8 @@ export default {
   name: "HelloWorld",
   data() {
     return {
-      board: [[0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4]]
+      board: [[0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4]],
+      score:0
     };
   },
   props: {
@@ -87,9 +88,14 @@ export default {
       alert(str);
     },
     updateBoard(board, direction) {
-      this.board = this.swipeBoard(direction, board);
-      let { updatedBoard, updatedTile } = this.placeTile(this.board);
-      this.board = updatedBoard;
+      let swipedBoard = this.swipeBoard(direction, board);
+      if(this.board.toString()==swipedBoard.toString()){
+        return false;
+      }else{
+        this.board = swipedBoard;
+        let { updatedBoard, updatedTile } = this.placeTile(this.board);
+        this.board = updatedBoard;
+      }
     },
     rotate2DArray(board, direction) {
       let newBoard = [];
@@ -158,31 +164,36 @@ export default {
       return { updatedBoard, updatedTile };
     },
 
+    updateScore(addedScore){
+      this.score =  this.score + addedScore;
+    },
+
     swipeBoard(direction, board) {
-      console.log(this);
       let updatedBoard = this.arrayClone(board);
       switch (direction) {
         case "right":
-          for (let i = 0; i < board.length; i++) {
-            board[i].reverse();
-            let loopLength = board[i].length - 1;
+          for (let i = 0; i < updatedBoard.length; i++) {
+            updatedBoard[i].reverse();
+            let loopLength = updatedBoard[i].length - 1;
             for (let j = 0; j < loopLength; j++) {
-              if (board[i][j] == 0) {
-                board[i].splice(j, 1);
+              if (updatedBoard[i][j] == 0) {
+                updatedBoard[i].splice(j, 1);
                 j--;
-                board[i].push(0);
+                updatedBoard[i].push(0);
                 loopLength--;
+                continue;
               }
-              if (board[i][j] == board[i][j + 1]) {
-                board[i][j] += board[i][j + 1];
-                board[i].splice(j + 1, 1);
-                board[i].push(0);
+              if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
+                updatedBoard[i][j] += updatedBoard[i][j + 1];
+                updatedBoard[i].splice(j + 1, 1);
+                updatedBoard[i].push(0);
                 loopLength--;
+                this.updateScore(updatedBoard[i][j]);
               }
             }
-            board[i].reverse();
+            updatedBoard[i].reverse();
           }
-          return board;
+          return updatedBoard;
         case "down":
           updatedBoard = this.rotate2DArray(updatedBoard, "Clockwise");
           for (let i = 0; i < updatedBoard.length; i++) {
@@ -193,12 +204,14 @@ export default {
                 j--;
                 updatedBoard[i].push(0);
                 loopLength--;
+                continue;
               }
               if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
                 updatedBoard[i][j] += updatedBoard[i][j + 1];
                 updatedBoard[i].splice(j + 1, 1);
                 updatedBoard[i].push(0);
                 loopLength--;
+                this.updateScore(updatedBoard[i][j]);
               }
             }
           }
@@ -212,12 +225,14 @@ export default {
                 j--;
                 board[i].push(0);
                 loopLength--;
+                continue;
               }
               if (board[i][j] == board[i][j + 1]) {
                 board[i][j] += board[i][j + 1];
                 board[i].splice(j + 1, 1);
                 board[i].push(0);
                 loopLength--;
+                this.updateScore(updatedBoard[i][j]);
               }
             }
           }
@@ -232,12 +247,14 @@ export default {
                 j--;
                 updatedBoard[i].push(0);
                 loopLength--;
+                continue;
               }
               if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
                 updatedBoard[i][j] += updatedBoard[i][j + 1];
                 updatedBoard[i].splice(j + 1, 1);
                 updatedBoard[i].push(0);
                 loopLength--;
+                this.updateScore(updatedBoard[i][j]);
               }
             }
           }

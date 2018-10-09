@@ -54,12 +54,15 @@ export default {
   name: "HelloWorld",
   data() {
     return {
-      board: [[0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4], [0, 2, 0, 4]],
+      board: [],
       score:0
     };
   },
   props: {
     msg: String
+  },
+  beforeMount(){
+    this.resetBoard();
   },
   mounted() {
     const that = this;
@@ -81,6 +84,14 @@ export default {
     };
   },
   methods: {
+    resetBoard(){
+      this.board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+      for(let i=0;i<3;i++){
+        let { updatedBoard } = this.placeTile(this.board);
+        this.board = updatedBoard;
+      }
+      this.score = 0;
+    },
     abc() {
       console.log("reached");
     },

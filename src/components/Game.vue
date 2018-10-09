@@ -11,6 +11,9 @@
       <div class="col-md-12 board" v-if="isCompleted">
         <h2>You've Won the Game</h2>
       </div>
+      <div class="col-md-12 board" v-if="isOver">
+        <h2>You've Lost the Game</h2>
+      </div>
      </div>
      <div class="row">
         <div class="col-md-6 pb-2 new-game" >
@@ -34,12 +37,44 @@ export default {
       score:0,
       isCompleted:false,
       has2048:false,
+      isOver:false,
     };
   },
   beforeMount(){
     this.resetBoard();
   },
   methods: {
+    setArrowEvents(enable){
+      if(enable){
+        const that = this;
+        document.onkeydown = function() {
+          switch (window.event.keyCode) {
+            case 37:
+              that.updateBoard(that.board, "left"); // execute a function by passing parameter
+              break;
+            case 38:
+              that.updateBoard(that.board, "up");
+              break;
+            case 39:
+              that.updateBoard(that.board, "right");
+              break;
+            case 40:
+              that.updateBoard(that.board, "down");
+              break;
+          }
+        };
+      }else{
+        const that = this;
+        document.onkeydown = function() {
+          switch (window.event.keyCode) {
+            case 37: break;
+            case 38: break;
+            case 39: break;
+            case 40: break;
+          }
+        };
+      }
+    },
     resetBoard(){
       this.board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
       for(let i=0;i<3;i++){
@@ -48,27 +83,16 @@ export default {
       }
       this.score = 0;
       this.isCompleted = false;
-      const that = this;
-      document.onkeydown = function() {
-        switch (window.event.keyCode) {
-          case 37:
-            that.updateBoard(that.board, "left"); // execute a function by passing parameter
-            break;
-          case 38:
-            that.updateBoard(that.board, "up");
-            break;
-          case 39:
-            that.updateBoard(that.board, "right");
-            break;
-          case 40:
-            that.updateBoard(that.board, "down");
-            break;
-        }
-      };
+      this.isOver = false;
+      this.setArrowEvents(true);
     },
     updateBoard(board, direction) {
       let swipedBoard = this.swipeBoard(direction, board);
       if(this.board.toString()==swipedBoard.toString()){
+        if(this.isGameOver()){
+          this.isOver = true;
+          this.setArrowEvents(false);
+        }
         return false;
       }else{
         this.board = swipedBoard;
@@ -77,19 +101,22 @@ export default {
       }
       if(this.has2048){
         this.isCompleted = true;
-        document.onkeydown = function() {
-      switch (window.event.keyCode) {
-        case 37:
-          break;
-        case 38:
-          break;
-        case 39:
-          break;
-        case 40:
-          break;
+        this.setArrowEvents(false)
       }
-    };
+    },
+    isGameOver(){
+      let emptyTiles = [];
+      for (let i = 0; i < this.board.length; i++) {
+        for (let j = 0; j < this.board[i].length; j++) {
+          if (this.board[i][j] === 0) {
+            emptyTiles.push([i, j]);
+          }
+        }
       }
+      if(emptyTiles.length==0){
+        return true;
+      }
+      return false;
     },
     rotate2DArray(board, direction) {
       let newBoard = [];
@@ -136,7 +163,7 @@ export default {
 
     placeTile(board) {
       let newTile;
-      if (Math.random() < 0.7) {
+      if (Math.random() < 0.65) {
         newTile = 2;
       } else {
         newTile = 4;
@@ -147,7 +174,7 @@ export default {
         for (let j = 0; j < updatedBoard[i].length; j++) {
           if (updatedBoard[i][j] === 0) {
             emptyTiles.push([i, j]);
-          }else if(updatedBoard[i][j]==16){
+          }else if(updatedBoard[i][j]==2048){
             this.has2048 = true;
           }
         }

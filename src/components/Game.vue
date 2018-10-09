@@ -1,35 +1,20 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+     <div class="row">
+      <div class="col-md-12">
+        <b-container class="bv-example-row board">
+          <b-row v-for="row in board">
+            <b-col class="tile" v-for="element in row">{{ element==0 ? '':element}}</b-col>
+          </b-row>
+        </b-container>
+      </div>
+      <div class="col-md-12 board" v-if="isCompleted">
+        <h2>You've Won the Game</h2>
+      </div>
+     </div>
      <div class="row">
         <div class="col-md-6 pb-2 new-game" >
-            <b-button size="lg" variant="primary">
+            <b-button size="lg" variant="primary" v-on:click="resetBoard()">
                 New Game
             </b-button>
         </div>
@@ -37,51 +22,22 @@
             <h3>Score <b-badge>{{score}}</b-badge></h3>
         </div>
      </div>
-     <div class="row">
-      <div class="col-md-12 board">
-        <b-container class="bv-example-row">
-          <b-row v-for="row in board">
-            <b-col class="tile" v-for="element in row">{{element}}</b-col>
-          </b-row>
-        </b-container>
-      </div>
-     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "HelloWorld",
+  name: "Game",
   data() {
     return {
       board: [],
-      score:0
+      score:0,
+      isCompleted:false,
+      has2048:false,
     };
-  },
-  props: {
-    msg: String
   },
   beforeMount(){
     this.resetBoard();
-  },
-  mounted() {
-    const that = this;
-    document.onkeydown = function() {
-      switch (window.event.keyCode) {
-        case 37:
-          that.updateBoard(that.board, "left"); // execute a function by passing parameter
-          break;
-        case 38:
-          that.updateBoard(that.board, "up");
-          break;
-        case 39:
-          that.updateBoard(that.board, "right");
-          break;
-        case 40:
-          that.updateBoard(that.board, "down");
-          break;
-      }
-    };
   },
   methods: {
     resetBoard(){
@@ -91,12 +47,24 @@ export default {
         this.board = updatedBoard;
       }
       this.score = 0;
-    },
-    abc() {
-      console.log("reached");
-    },
-    disp(str) {
-      alert(str);
+      this.isCompleted = false;
+      const that = this;
+      document.onkeydown = function() {
+        switch (window.event.keyCode) {
+          case 37:
+            that.updateBoard(that.board, "left"); // execute a function by passing parameter
+            break;
+          case 38:
+            that.updateBoard(that.board, "up");
+            break;
+          case 39:
+            that.updateBoard(that.board, "right");
+            break;
+          case 40:
+            that.updateBoard(that.board, "down");
+            break;
+        }
+      };
     },
     updateBoard(board, direction) {
       let swipedBoard = this.swipeBoard(direction, board);
@@ -106,6 +74,21 @@ export default {
         this.board = swipedBoard;
         let { updatedBoard, updatedTile } = this.placeTile(this.board);
         this.board = updatedBoard;
+      }
+      if(this.has2048){
+        this.isCompleted = true;
+        document.onkeydown = function() {
+      switch (window.event.keyCode) {
+        case 37:
+          break;
+        case 38:
+          break;
+        case 39:
+          break;
+        case 40:
+          break;
+      }
+    };
       }
     },
     rotate2DArray(board, direction) {
@@ -164,6 +147,8 @@ export default {
         for (let j = 0; j < updatedBoard[i].length; j++) {
           if (updatedBoard[i][j] === 0) {
             emptyTiles.push([i, j]);
+          }else if(updatedBoard[i][j]==16){
+            this.has2048 = true;
           }
         }
       }
@@ -192,7 +177,6 @@ export default {
                 j--;
                 updatedBoard[i].push(0);
                 loopLength--;
-                continue;
               }
               if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
                 updatedBoard[i][j] += updatedBoard[i][j + 1];
@@ -215,7 +199,6 @@ export default {
                 j--;
                 updatedBoard[i].push(0);
                 loopLength--;
-                continue;
               }
               if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
                 updatedBoard[i][j] += updatedBoard[i][j + 1];
@@ -236,7 +219,6 @@ export default {
                 j--;
                 board[i].push(0);
                 loopLength--;
-                continue;
               }
               if (board[i][j] == board[i][j + 1]) {
                 board[i][j] += board[i][j + 1];
@@ -258,7 +240,6 @@ export default {
                 j--;
                 updatedBoard[i].push(0);
                 loopLength--;
-                continue;
               }
               if (updatedBoard[i][j] == updatedBoard[i][j + 1]) {
                 updatedBoard[i][j] += updatedBoard[i][j + 1];
@@ -278,47 +259,38 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 .new-game button {
   margin: 20px;
 }
 
 .new-game {
-  padding-left: 300px;
+  padding-left: 500px;
 }
 
 .score h3 {
-  margin: 22px;
+     margin-top: 24px;
+    font-size: 30px;
 }
 
 .score {
-  padding-right: 300px;
-}
-
-.board {
+  padding-right: 500px; 
 }
 
 .tile {
   min-height: 75px;
 }
 
+.board{
+  background-color: #b3e6cb;
+  padding:0px;
+}
+
 .tile.col {
   padding-right: 0px;
   padding-left: 0px;
-  padding: 25px;
+  font-size: 24px;
+  padding: 16px;
+  font-weight: 700;
   border:2px solid rgb(96, 157, 209)
 }
 
@@ -326,5 +298,11 @@ a {
   max-width: 300px;
   min-height: 300px;
   border: 5px solid black;
+}
+
+.row{
+  margin-right: 0px;
+  margin-left: 0px; 
+
 }
 </style>

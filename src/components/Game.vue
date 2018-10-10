@@ -110,6 +110,23 @@ export default {
         for (let j = 0; j < this.board[i].length; j++) {
           if (this.board[i][j] === 0) {
             emptyTiles.push([i, j]);
+            break;
+          }
+          if(this.board[i][j]&&this.board[i][j-1]&&(this.board[i][j]==this.board[i][j-1])){
+            emptyTiles.push([i,j]);
+            break;
+          }
+          if(this.board[i][j]&&this.board[i][j+1]&&(this.board[i][j]==this.board[i][j+1])){
+            emptyTiles.push([i,j]);
+            break;
+          }
+          if(this.board[i][j]&&this.board[i-1][j]&&(this.board[i][j]==this.board[i-1][j])){
+            emptyTiles.push([i,j]);
+            break;
+          }
+          if(this.board[i][j]&&this.board[i+1][j]&&(this.board[i][j]==this.board[i+1][j])){
+            emptyTiles.push([i,j]);
+            break;
           }
         }
       }
@@ -313,10 +330,10 @@ export default {
 }
 
 .tile.col {
+  padding: 16px;
   padding-right: 0px;
   padding-left: 0px;
   font-size: 24px;
-  padding: 16px;
   font-weight: 700;
   border:2px solid rgb(96, 157, 209)
 }
